@@ -1,0 +1,90 @@
+<html>
+
+    <head>
+        <style>
+            div,p  {
+                -webkit-user-select: none;
+                -moz-user-select: none;
+            }
+            div {
+				height: 100%;
+				width: 100%;
+				background: #334455;
+                font-family: monospace;
+				position: fixed;
+				top: 0%;
+				left: 0%;
+			}
+            p {
+				height: 30vh;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+                color: white;
+                font-size: 200px;
+            }
+
+            div.warn {
+                background-color: #a18f39;
+            }
+
+            div.end {
+                background-color: #aa1100;
+            }
+        </style>
+    </head>
+    <body>
+        <div><p id="time">00:00</p></div>
+        <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+        <script type="text/javascript" src="bower_components/jquery-longpress/jquery.longpress.js"></script>
+        <script type="text/javascript">
+            $('document').ready(function() {
+                var time = localStorage.getItem('talkTime') || 0;
+
+                var start = function() {
+                    return setInterval(function() {
+                        render(++time);
+
+                        localStorage.setItem('talkTime', time);
+                    }, 1000);
+                };
+                var stop = function(id) {
+                    clearInterval(id);
+                    return null;
+                };
+
+                var WARN_TIME = 60*25;
+                var END_TIME = 60*30;
+
+                var render = function(time) {
+                    if (time >= WARN_TIME) {
+                        $('#time').parent().addClass('warn');
+                    }
+
+                    if (time >= END_TIME) {
+                        $('#time').parent().addClass('end');
+                    }
+
+                    $('#time').html(("0"+Math.floor(time/60)).slice(-2) + ":"  + ("0"+(time % 60)).slice(-2));
+                };
+                render(time);
+
+                var timer = start();
+
+                $('body').longpress(function(e) {
+                    e.preventDefault();
+                    time = 0;
+                    render(time);
+                    return false;
+                });
+                $('body').click(function() {
+                    if (timer) {
+                        timer = stop(timer);
+                    } else {
+                        timer = start();
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>
