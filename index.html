@@ -39,29 +39,33 @@
         <script type="text/javascript" src="bower_components/jquery-longpress/jquery.longpress.js"></script>
         <script type="text/javascript">
             $('document').ready(function() {
-                var time = localStorage.getItem('talkTime') || 0;
+                var RESET_TIME = 30*60;
+                var WARN_TIME = 10*60;
+                var END_TIME = 5*60;
+
+                var time = localStorage.getItem('talkTime') || RESET_TIME;
 
                 var start = function() {
                     return setInterval(function() {
-                        render(++time);
+                        if (time > 0) {
+                            render(--time);
+                        }
 
                         localStorage.setItem('talkTime', time);
                     }, 1000);
                 };
                 var stop = function(id) {
                     clearInterval(id);
+                    localStorage.setItem('talkTime', time);
                     return null;
                 };
 
-                var WARN_TIME = 60*25;
-                var END_TIME = 60*30;
-
                 var render = function(time) {
-                    if (time >= WARN_TIME) {
+                    if (time <= WARN_TIME) {
                         $('#time').parent().addClass('warn');
                     }
 
-                    if (time >= END_TIME) {
+                    if (time <= END_TIME) {
                         $('#time').parent().addClass('end');
                     }
 
@@ -73,10 +77,12 @@
 
                 $('body').longpress(function(e) {
                     e.preventDefault();
-                    time = 0;
+                    time = RESET_TIME;
+                    localStorage.setItem('talkTime', time);
                     render(time);
                     return false;
                 });
+
                 $('body').click(function() {
                     if (timer) {
                         timer = stop(timer);
